@@ -1,5 +1,8 @@
 HELP.md
 target/
+!target/mobile-app-ws-0.0.1-SNAPSHOT.jar.original
+!target/mobile-app-ws-0.0.1-SNAPSHOT.jar
+
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
