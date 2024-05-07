@@ -1,6 +1,5 @@
 package com.example.mobilt.app.ws.ui.controller;
 
-import com.example.mobilt.app.ws.exceptions.UserServiceException;
 import com.example.mobilt.app.ws.ui.model.request.UpdateUserDetailsRequestModel;
 import com.example.mobilt.app.ws.ui.model.request.UserDetailsRequestModel;
 import com.example.mobilt.app.ws.ui.model.response.UserRest;
@@ -12,16 +11,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/users") // http://localhost:8080/users
-public class UserController {
 
-	Map<String, UserRest> users;
+public class UserController {
+	private final UserService userService;
 
 	@Autowired
-	UserService userService;
+	public UserController(UserService userService) {
+		this.userService = userService;
+	}
 
 	@GetMapping()
 	public String getUser(@RequestParam(value="page", defaultValue="1") int page, 
@@ -30,40 +29,40 @@ public class UserController {
 		return "get user was called with page = " + page + " and limit = " + limit + " and sort = " + sort;
 	}
 	
-	@GetMapping(path="/{userId}", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+	@GetMapping(path="/{userId}", produces =
+			{MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<UserRest> getUser(@PathVariable String userId) {
-		if (true) throw new UserServiceException("A user service exception is thrown");
-
-		if (users.containsKey(userId)) {
-			return new ResponseEntity<>(users.get(userId), HttpStatus.OK);
+		UserRest fetchedUserDetails = userService.getUser(userId);
+		if (fetchedUserDetails != null) {
+			return new ResponseEntity<>(fetchedUserDetails, HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
 	
 	@PostMapping(consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
-	produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+				 produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<UserRest> createUser(@Valid @RequestBody UserDetailsRequestModel userDetails) {
 
-			UserRest returnValue = userService.createUser(userDetails);
-			return new ResponseEntity<UserRest>(returnValue, HttpStatus.OK);
+			UserRest returnUser = userService.createUser(userDetails);
+        return new ResponseEntity<>(returnUser, HttpStatus.OK);
 	}
 	
-	@PutMapping(path="/{userId}", consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
+	@PutMapping(path="/{userId}",
+			consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
 			produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-	public UserRest updateUser(@PathVariable String userId, @Valid @RequestBody UpdateUserDetailsRequestModel userDetails) {
-		UserRest storedUserDetails = users.get(userId);
-		storedUserDetails.setFirstName(userDetails.getFirstName());
-		storedUserDetails.setLastName(userDetails.getLastName());
-
-		users.put(userId, storedUserDetails);
-
-		return storedUserDetails;
+	public ResponseEntity<UserRest> updateUser(@PathVariable String userId,
+											   @RequestBody UpdateUserDetailsRequestModel userDetails) {
+		UserRest updatedUserDetails = userService.updateUser(userId, userDetails);
+		if (updatedUserDetails == null) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(updatedUserDetails, HttpStatus.OK);
 	}
 	
-	@DeleteMapping(path="/{id}")
-	public ResponseEntity<Void> deleteUser(@PathVariable String id) {
-		users.remove(id);
+	@DeleteMapping(path="/{userId}")
+	public ResponseEntity<Void> deleteUser(@PathVariable String userId) {
+		userService.deleteUser(userId);
 		return ResponseEntity.noContent().build();
 	}
 }
