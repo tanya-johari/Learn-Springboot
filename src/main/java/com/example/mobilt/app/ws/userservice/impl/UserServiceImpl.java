@@ -1,5 +1,6 @@
 package com.example.mobilt.app.ws.userservice.impl;
 
+import com.example.mobilt.app.ws.exceptions.UserServiceException;
 import com.example.mobilt.app.ws.shared.Utils;
 import com.example.mobilt.app.ws.ui.model.request.UpdateUserDetailsRequestModel;
 import com.example.mobilt.app.ws.ui.model.request.UserDetailsRequestModel;
@@ -22,11 +23,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserRest getUser(String id) {
-        if(users != null && users.containsKey(id)) {
-            return users.get(id);
+    public UserRest getUser(String userId) {
+        if(users == null || !users.containsKey(userId)) {
+            throw new UserServiceException("User not found with id " + userId);
         }
-        return null;
+        return users.get(userId);
     }
 
     @Override
@@ -47,7 +48,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserRest updateUser(String userId, UpdateUserDetailsRequestModel userDetails) {
-        if(users == null) return null;
+        if(users == null || !users.containsKey(userId)) {
+            throw new UserServiceException("User not found with id " + userId);
+        }
 
         UserRest storedUserDetails = users.get(userId);
         storedUserDetails.setFirstName(userDetails.getFirstName());
