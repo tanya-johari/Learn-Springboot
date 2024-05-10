@@ -15,12 +15,7 @@ import java.util.Map;
 @Service
 public class UserServiceImpl implements UserService {
     private Map<String, UserRest> users;
-    private final Utils utils;
 
-    @Autowired
-    public UserServiceImpl(Utils utils) {
-        this.utils = utils;
-    }
 
     @Override
     public UserRest getUser(String userId) {
@@ -33,16 +28,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserRest createUser(UserDetailsRequestModel userDetails) {
 
-        UserRest newUser = new UserRest();
-        newUser.setEmail(userDetails.getEmail());
-        newUser.setFirstName(userDetails.getFirstName());
-        newUser.setLastName(userDetails.getLastName());
-
-        String userId = utils.generateUserId();
-        newUser.setUserId(userId);
+        String firstName = userDetails.getFirstName();
+        String lastName = userDetails.getLastName();
+        String email = userDetails.getEmail();
+        UserRest newUser = new UserRest(firstName, lastName, email);
 
         if (users == null) users = new HashMap<>();
-        users.put(userId, newUser);
+        users.put(newUser.getUserId(), newUser);
         return newUser;
     }
 

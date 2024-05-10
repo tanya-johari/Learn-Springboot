@@ -1,10 +1,21 @@
 package com.example.mobilt.app.ws.ui.model.response;
 
+import com.example.mobilt.app.ws.shared.Utils;
+
 public class UserRest {
     private String firstName;
     private String lastName;
     private String email;
-    private String userId;
+    private final String userId;
+
+    Utils utils = new Utils();
+
+    public UserRest(String firstName, String lastName, String email) {
+        this.userId = utils.generateUserId();
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -32,9 +43,5 @@ public class UserRest {
 
     public String getUserId() {
         return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 }
